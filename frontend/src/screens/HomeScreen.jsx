@@ -1,12 +1,12 @@
 import React from 'react';
-import { Row, Col } from 'react-bootstrap';
+import {Row, Col} from 'react-bootstrap';
 import Product from '../components/Product';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
-import { useGetProductsQuery } from '../slices/productsApiSlice';
+import {useGetProductsQuery} from '../slices/productsApiSlice';
 
 const HomeScreen = () => {
-  const { data: products, isLoading, error } = useGetProductsQuery();
+  const {data: products, isLoading, error} = useGetProductsQuery();
 
   return (
     <>

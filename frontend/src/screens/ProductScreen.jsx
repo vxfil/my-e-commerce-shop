@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { Row, Col, Image, ListGroup, Card, Button, Form } from 'react-bootstrap';
+import React, {useState} from 'react';
+import {useDispatch} from 'react-redux';
+import {useParams, useNavigate} from 'react-router-dom';
+import {Link} from 'react-router-dom';
+import {Row, Col, Image, ListGroup, Card, Button, Form} from 'react-bootstrap';
 import Rating from '../components/Rating';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
-import { useGetProductDetailsQuery } from '../slices/productsApiSlice';
-import { addToCart } from '../slices/cartSlice';
+import {useGetProductDetailsQuery} from '../slices/productsApiSlice';
+import {addToCart} from '../slices/cartSlice';
 
 const ProductScreen = () => {
-  const { id: productId } = useParams();
+  const {id: productId} = useParams();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [qty, setQty] = useState(1);
 
-  const { data: product, isLoading, error } = useGetProductDetailsQuery(productId);
+  const {data: product, isLoading, error} = useGetProductDetailsQuery(productId);
 
   const addToCartHandler = () => {
-    dispatch(addToCart({ ...product, qty }));
+    dispatch(addToCart({...product, qty}));
     navigate('/cart');
   };
 
