@@ -1,3 +1,5 @@
+import jwt from 'jsonwebtoken';
+import {OAuth2Client} from 'google-auth-library';
 import asyncHandler from '../middleware/asyncHandler.js';
 import User from '../models/userModel.js';
 import generateToken from '../utils/generateToken.js';
@@ -10,13 +12,15 @@ const authUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({email});
 
-  if (user && (await user.matchPassword(password))) {
+  if (user && (await user.matchPassword(password)) && user.provider !== 'google') {
     generateToken(res, user._id);
 
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      verified: user.verified,
+      provider: user.provider,
       isAdmin: user.isAdmin,
     });
   } else {
@@ -51,6 +55,8 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      verified: user.verified,
+      provider: user.provider,
       isAdmin: user.isAdmin,
     });
   } else {
@@ -91,7 +97,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route PUT /api/users/profile
 // @access Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-  console.log('req', req);
   const user = await User.findById(req.user._id);
 
   if (user) {
@@ -144,6 +149,47 @@ const updateUser = asyncHandler(async (req, res) => {
   res.send('update user');
 });
 
+const googleAuth = asyncHandler(async (req, res) => {
+  const {code} = req.body;
+
+  if (!code) {
+    res.status(400);
+    throw new Error('Invalid authorization code!');
+  }
+
+  const oAuth2Client = new OAuth2Client(
+    process.env.GOOGLE_OAUTH_CLIENT_ID,
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+    'postmessage',
+  );
+
+  const { tokens } = await oAuth2Client.getToken(code); // Exchange code for tokens
+  const { id_token } = tokens;
+  const { email_verified, email, name } = jwt.decode(id_token);
+
+  if (!email_verified) {
+    res.status(403);
+    throw new Error('Google account not verified');
+  }
+
+  const existingUser = await User.findOneAndUpdate(
+    { email },
+    { name },
+    { new: true, upsert: true }
+  );
+
+  generateToken(res, existingUser._id);
+
+  res.status(200).json({
+    _id: existingUser._id,
+    name: existingUser.name,
+    email: existingUser.email,
+    verified: existingUser.verified,
+    provider: existingUser.provider,
+    isAdmin: existingUser.isAdmin,
+  });
+});
+
 export {
   authUser,
   registerUser,
@@ -154,4 +200,5 @@ export {
   deleteUser,
   getUserById,
   updateUser,
+  googleAuth,
 };

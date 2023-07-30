@@ -9,6 +9,7 @@ import {
   deleteUser,
   getUserById,
   updateUser,
+  googleAuth,
 } from '../controllers/userController.js';
 import {protect, admin} from '../middleware/authMiddleware.js';
 
@@ -19,6 +20,7 @@ router.route('/')
   .get(protect, admin, getUsers);
 router.post('/logout', logoutUser);
 router.post('/auth', authUser);
+router.post('/g-auth', googleAuth);
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);

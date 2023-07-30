@@ -4,9 +4,11 @@ import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {Form, Button, Row, Col} from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import Loader from '../components/Loader';
-import {useLoginMutation} from '../slices/usersApiSlice';
+import {useGoogleLogin} from '@react-oauth/google';
+import {useLoginMutation, useAuthGoogleMutation} from '../slices/usersApiSlice';
 import {setCredentials} from '../slices/authSlice';
 import {toast} from 'react-toastify';
+import {FcGoogle} from 'react-icons/fc';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -16,6 +18,10 @@ const LoginScreen = () => {
   const navigate = useNavigate();
 
   const [login, {isLoading}] = useLoginMutation();
+
+  const [authGoogle, {isLoading: isLoadingGoogle}] = useAuthGoogleMutation();
+
+  const loading = isLoading || isLoadingGoogle;
 
   const {userInfo} = useSelector((state) => state.auth);
 
@@ -39,6 +45,19 @@ const LoginScreen = () => {
       toast.error(error?.data?.message || error.error);
     }
   };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async ({code}) => {
+      try {
+        const res = await authGoogle({code}).unwrap();
+        dispatch(setCredentials({...res}));
+        navigate(redirect);
+      } catch (error) {
+        toast.error(error?.data?.message || error.error);
+      }
+    },
+    flow: 'auth-code',
+  });
 
   return (
     <FormContainer>
@@ -64,11 +83,21 @@ const LoginScreen = () => {
           />
         </Form.Group>
 
-        <Button type='submit' variant='primary' className='mt-2' disabled={isLoading}>
-            Sign In
-        </Button>
-
-        {isLoading && <Loader />}
+        <Row className='mt-2'>
+          <Col md={3}>
+            <Button type='submit' variant='primary' disabled={loading}>
+              Sign In
+            </Button>
+          </Col>
+          <Col md={9}>
+            <Button variant='light' onClick={() => googleLogin()}>
+              <FcGoogle />{' '}
+              Continue with Google
+            </Button>
+          </Col>
+        </Row>
+        
+        {loading && <Loader />}
       </Form>
 
       <Row className='py-3'>
