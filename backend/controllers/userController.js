@@ -184,8 +184,8 @@ const googleAuth = asyncHandler(async (req, res) => {
     _id: existingUser._id,
     name: existingUser.name,
     email: existingUser.email,
-    verified: existingUser.verified,
-    provider: existingUser.provider,
+    verified: email_verified,
+    provider: 'google',
     isAdmin: existingUser.isAdmin,
   });
 });
