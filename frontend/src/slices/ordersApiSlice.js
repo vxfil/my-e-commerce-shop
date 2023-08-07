@@ -1,5 +1,5 @@
 import {apiSlice} from './apiSlice';
-import {ORDERS_URL, PAYPAL_URL} from '../constants';
+import {LIQPAY_URL, ORDERS_URL, PAYPAL_URL} from '../constants';
 
 export const ordersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -34,6 +34,12 @@ export const ordersApiSlice = apiSlice.injectEndpoints({
         url: `${ORDERS_URL}/mine`
       }),
       keepUnusedDataFor: 5
+    }),
+    getLiqPayAcceessParams: builder.query({
+      query: (orderId) => ({
+        url: `${LIQPAY_URL}/${orderId}`
+      }),
+      keepUnusedDataFor: 5
     })
   })
 });
@@ -44,4 +50,5 @@ export const {
   usePayOrderMutation, 
   useGetPayPalClientIdQuery,
   useGetMyOrdersQuery,
+  useGetLiqPayAcceessParamsQuery,
 } = ordersApiSlice;

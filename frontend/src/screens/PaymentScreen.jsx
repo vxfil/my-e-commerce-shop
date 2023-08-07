@@ -7,7 +7,7 @@ import CheckoutSteps from '../components/CheckoutSteps';
 import {savePaymentMethod} from '../slices/cartSlice';
 
 const PaymentScreen = () => {
-  const [paymentMethod, setPaymentMethod] = useState('PayPal');
+  const [paymentMethod, setPaymentMethod] = useState('Privat24');
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -38,16 +38,24 @@ const PaymentScreen = () => {
             <Form.Check
               type='radio'
               className='my-2'
+              label='Privat24 or Credit Card'
+              id='Privat24'
+              name='paymentMethod'
+              onChange={(event) => setPaymentMethod(event.target.id)}
+              checked={paymentMethod === 'Privat24'}
+            />
+            <Form.Check
+              type='radio'
+              className='my-2'
               label='PayPal or Credit Card'
               id='PayPal'
               name='paymentMethod'
-              value={paymentMethod}
-              checked
-              onChange={(event) => setPaymentMethod(event.target.value)}
+              onChange={(event) => setPaymentMethod(event.target.id)}
+              checked={paymentMethod === 'PayPal'}
             />
           </Col>
         </Form.Group>
-        <Button type='submit' variant='primary'>
+        <Button type='submit' variant='primary' className='my-3'>
             Continue
         </Button>
       </Form>

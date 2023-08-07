@@ -1,12 +1,19 @@
 import React, {useEffect} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {useSelector} from 'react-redux';
+// eslint-disable-next-line no-unused-vars
 import {Row, Col, ListGroup, Image, Form, Button, Card} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import {PayPalButtons, usePayPalScriptReducer} from '@paypal/react-paypal-js';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import {useGetOrderDetailsQuery, usePayOrderMutation, useGetPayPalClientIdQuery} from '../slices/ordersApiSlice';
+import LiqpayWidjet from '../components/LiqpayWidjet';
+import {
+  useGetOrderDetailsQuery,
+  usePayOrderMutation,
+  useGetPayPalClientIdQuery,
+  useGetLiqPayAcceessParamsQuery,
+} from '../slices/ordersApiSlice';
 
 const OrderScreen = () => {
   const {id: orderId} = useParams();
@@ -17,27 +24,48 @@ const OrderScreen = () => {
 
   const [{isPending}, paypalDispatch] = usePayPalScriptReducer();
 
+  // eslint-disable-next-line no-unused-vars
+  const {data: liqpay, isLoading: loadingLiqPay, error: errorLiqPay} = useGetLiqPayAcceessParamsQuery(orderId);
+
   const {data: paypal, isLoading: loadingPayPal, error: errorPayPal} = useGetPayPalClientIdQuery();
 
+  const isPrivat24PaymentMethod = order && order.paymentMethod === 'Privat24';
+  const isPaypalPaymentMethod = order && order.paymentMethod === 'PayPal';
+
+  // eslint-disable-next-line no-unused-vars
   const {userInfo} = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!errorPayPal && !loadingPayPal && paypal.clientId) {
-      const loadPayPalScript = async () => {
-        paypalDispatch({
-          type: 'resetOptions',
-          value: {
-            'clientId': paypal.clientId,
-            currency: 'USD',
+    switch (order && order.paymentMethod) {
+    case 'Privat24': {
+      console.log('orivat24');
+      break;
+    }
+
+    case 'PayPal': {
+      if (!errorPayPal && !loadingPayPal && paypal.clientId) {
+        const loadPayPalScript = async () => {
+          paypalDispatch({
+            type: 'resetOptions',
+            value: {
+              'clientId': paypal.clientId,
+              currency: 'USD',
+            }
+          });
+          paypalDispatch({type: 'setLoadingStatus', value: 'pending'});
+        };
+        if (order && !order.isPaid) {
+          if (!window.paypal) {
+            loadPayPalScript();
           }
-        });
-        paypalDispatch({type: 'setLoadingStatus', value: 'pending'});
-      };
-      if (order && !order.isPaid) {
-        if (!window.paypal) {
-          loadPayPalScript();
         }
       }
+      break;
+    }
+
+    default:
+      console.log('Cash');
+      break;
     }
   }, [order, paypal, paypalDispatch, loadingPayPal, errorPayPal]);
 
@@ -164,8 +192,7 @@ const OrderScreen = () => {
                       <Col>${order.totalPrice}</Col>
                     </Row>
                   </ListGroup.Item>
-                  
-                  {!order.isPaid && (
+                  {isPaypalPaymentMethod && !order.isPaid && (
                     <ListGroup.Item>
                       {loadingPay && <Loader />}
                       
@@ -185,6 +212,21 @@ const OrderScreen = () => {
                       )}
                     </ListGroup.Item>
                   )}
+
+                  {isPrivat24PaymentMethod && !order.isPaid && (
+                    <ListGroup.Item>
+                      {loadingLiqPay ? 
+                        <Loader /> :
+                        errorLiqPay ? 
+                          (<Message variant="danger">{errorLiqPay.error}</Message>) : 
+                          (<LiqpayWidjet 
+                            data={liqpay.data} 
+                            signature={liqpay.signature} 
+                            language='en' 
+                          />)}
+                    </ListGroup.Item>
+                  )}
+
                   {/* MARK AS DELIVERED PLACEHOLDER */}
                 </ListGroup>
               </Card>
