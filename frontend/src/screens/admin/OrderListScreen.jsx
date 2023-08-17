@@ -7,8 +7,7 @@ import Loader from '../../components/Loader';
 import {useGetOrdersQuery} from '../../slices/ordersApiSlice';
 
 const OrderListScreen = () => {
-  const {data: orders, isLoading, error} = useGetOrdersQuery();
-  console.log('orders', orders); 
+  const {data: orders, isLoading, error} = useGetOrdersQuery(); 
 
   return (
     <>
