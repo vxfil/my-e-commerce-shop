@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   
-  const clientId='289330535160-7b45sqiicl5nsqpca1tpnps3for3c30c.apps.googleusercontent.com';
+  const clientId = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
 
   return (
     <>
