@@ -22,7 +22,8 @@
     "google-auth-library": "^9.0.0",
     "jsonwebtoken": "^9.0.1",
     "liqpay-sdk-nodejs": "github:liqpay/sdk-nodejs",
-    "mongoose": "^7.4.0"
+    "mongoose": "^7.4.0",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
